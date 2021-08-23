@@ -12,6 +12,7 @@ class LoadingPageVC: UIViewController {
     let actionButton = PokeButton(backgroundColor: .green, title: "Enter")
     let searchImage = PokeImage(imageName: "magnifyingglass")
     let saveImage = PokeImage(imageName: "star")
+    let pokeBallImage = PokeImage(imageName: "octagon")
     
     let searchTitle = PokeTitle(textAlignment: .left, fontSize: 20, color: .white)
     let saveTitle = PokeTitle(textAlignment: .left, fontSize: 20, color: .white)
@@ -26,18 +27,6 @@ class LoadingPageVC: UIViewController {
         label.font = UIFont.systemFont(ofSize: 40, weight: .bold)
         label.font = UIFont(name: K.fontName, size: 40)
         return label
-    }()
-    
-    var pokeBallImage: UIImageView = {
-        let image = UIImageView()
-        image.contentMode = .scaleAspectFit
-        image.clipsToBounds = true
-        image.layer.cornerRadius = 10.0
-        image.translatesAutoresizingMaskIntoConstraints = false
-        image.image = UIImage(named: "pokeBall")
-        image.backgroundColor = .black
-
-        return image
     }()
     
     override func viewDidLoad() {
