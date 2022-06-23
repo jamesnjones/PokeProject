@@ -2,7 +2,7 @@
 //  PokeButton.swift
 //  PokeProject
 //
-//  Created by james Jones on 17/08/2021.
+//  Created by james Jones on 20/06/2022.
 //
 
 import UIKit
@@ -15,7 +15,7 @@ class PokeButton: UIButton {
         }
         
         required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")   // this error is cos we dont have storyboard, otherwise we write stuff here
+            fatalError("init(coder:) has not been implemented")   // this error is because we dont have storyboard, otherwise we would write more code here
         }
         
         init(backgroundColor: UIColor, title: String){

@@ -2,7 +2,7 @@
 //  PokemonDetailVC.swift
 //  PokeProject
 //
-//  Created by james Jones on 18/08/2021.
+//  Created by james Jones on 20/06/2022.
 //
 
 import UIKit
@@ -10,7 +10,7 @@ import CoreData
 
 class PokemonDetailVC: UIViewController {
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    var pokemonEntity: [PokemonEntity]?  // again ref to core data database
+    var pokemonEntity: [PokemonEntity]?  // reference to core data database
     
     var caught: Bool = false  // will use to check whether we have a pokemon saved or not
     var name: String = ""
@@ -22,6 +22,54 @@ class PokemonDetailVC: UIViewController {
     var speedTitle = PokeTitle(textAlignment: .left, fontSize: 20, color: .darkText)
     var funFactTitle = PokeTitle(textAlignment: .left, fontSize: 20, color: .darkText)
     var movesTitle = PokeTitle(textAlignment: .left, fontSize: 30, color: .darkText)
+    
+    var hpImage : UIImageView = {
+        let image = UIImageView()
+        image.contentMode = .scaleAspectFit
+        image.clipsToBounds = true
+        image.layer.cornerRadius = 10.0
+        image.image = UIImage(systemName: "heart.circle")?.withTintColor(.red, renderingMode: .alwaysOriginal)
+        image.translatesAutoresizingMaskIntoConstraints = false
+        image.layer.borderColor = UIColor.black.cgColor
+        
+        return image
+    }()
+    
+    var attackImage : UIImageView = {
+        let image = UIImageView()
+        image.contentMode = .scaleAspectFit
+        image.clipsToBounds = true
+        image.layer.cornerRadius = 10.0
+        image.image = UIImage(systemName: "hammer.circle")?.withTintColor(.black, renderingMode: .alwaysOriginal)
+        image.translatesAutoresizingMaskIntoConstraints = false
+        image.layer.borderColor = UIColor.black.cgColor
+        
+        return image
+    }()
+    
+    var defenceImage : UIImageView = {
+        let image = UIImageView()
+        image.contentMode = .scaleAspectFit
+        image.clipsToBounds = true
+        image.layer.cornerRadius = 10.0
+        image.image = UIImage(systemName: "shield.slash.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+        image.translatesAutoresizingMaskIntoConstraints = false
+        image.layer.borderColor = UIColor.black.cgColor
+        
+        return image
+    }()
+    
+    var speedImage : UIImageView = {
+        let image = UIImageView()
+        image.contentMode = .scaleAspectFit
+        image.clipsToBounds = true
+        image.layer.cornerRadius = 10.0
+        image.image = UIImage(systemName: "bolt.circle")?.withTintColor(.orange, renderingMode: .alwaysOriginal)
+        image.translatesAutoresizingMaskIntoConstraints = false
+        image.layer.borderColor = UIColor.black.cgColor
+        
+        return image
+    }()
     
     var hpBar = PokeProgressBar(progressViewStyle: .bar)
     var attackBar = PokeProgressBar(progressViewStyle: .bar)
@@ -69,17 +117,22 @@ class PokemonDetailVC: UIViewController {
         getPokemon()
         configureUI()
         
-        self.catchButton.setTitle(UserDefaults.standard.bool(forKey: name) ? "Caught" : "Catch" , for: .normal) // Ternary operater to decide what text should be
+        self.catchButton.setTitle(UserDefaults.standard.bool(forKey: name) ? "Caught" : "Catch" , for: .normal)
+        // Ternary operater to decide what text should be
     }
     
     @objc func catchButtonPressed() {
         DispatchQueue.main.async { [self] in
 
-            if !UserDefaults.standard.bool(forKey: name) { // If false this pokemone is not saved, so go ahead and save but if true then nothing will happen. This will make sure we dont allow users to add duplicates of the same pokemone
+            if !UserDefaults.standard.bool(forKey: name) {
+                    // If false this pokemone is not saved, so go ahead and save but if true then nothing will happen.
+                    // This will make sure we dont allow users to add duplicates of the same pokemon
             saveData(name: name, url: (results[0].sprites?.front_default)!)
                 self.presentAlertOnMainThread(title: "Caught ⭐️", message: "You successfully caught \(name)", buttonTitle: "Ok")
+                self.catchButton.setTitle(UserDefaults.standard.bool(forKey: name) ? "Caught" : "Catch" , for: .normal)
             }else {
-                self.presentAlertOnMainThread(title: "Added Already", message: "Go catch some new Pokemon", buttonTitle: "OK") // simple alert just to let them know they have already added this pokemon
+                self.presentAlertOnMainThread(title: "Added Already", message: "Go catch some new Pokemon", buttonTitle: "OK")
+                // simple alert just to let them know they have already added this pokemon
             }
         }
     }
@@ -98,15 +151,20 @@ class PokemonDetailVC: UIViewController {
     }
     
     private func getFact(id: Int) {
-        NetworkManager.network.getPokemon(endpoint: "characteristic/\(String(describing: id))/") { resultss in
+        NetworkManager.network.getPokemon(endpoint: "characteristic/\(String(describing: id))/") { [self] resultss in
             switch resultss {
             case .success(let funFact):
                 DispatchQueue.main.async { [self] in
-                    funFactTitle.text = "Fun Fact: " + (funFact.descriptions?[2].description ?? "N/a")
+                    funFactTitle.text = "Fun Fact: " + (funFact.descriptions?[7].description ?? "N/a")
                 }
             case .failure(let error):
-                // There isnt always a fun fact so this will show when that is not available but the app will still work and function i.e saving your favourites.
+                DispatchQueue.main.async {
+                    funFactTitle.text = "Fun Fact: N/a"
+                }
+                // There isnt always a fun fact so this will show when that is not available but the app will still work and
+                // function i.e saving your favourites.
                 // Something i would improve on with more time.
+                // will keep alert there to show how my custom alert is designed.
              self.presentAlertOnMainThread(title: K.error, message: error.rawValue, buttonTitle: "OK")
             }
         }
@@ -125,21 +183,22 @@ class PokemonDetailVC: UIViewController {
                         moveTwo.text = "Run Away"
                     }else {
                         moveTwo.text = results.abilities?[1].ability.name
-                    } // Some pokemon only had 1 move ability so i wrote some logic so if that is the case the second will default to Run Away instead of crashing 
-                    
-                    hpTitle.text = "HP                 " + String(results.stats?[0].base_stat ?? 0)
+                    } // Some pokemon only had 1 move ability so i wrote some logic so if that is the case the second will default
+                        // to Run Away instead of crashing
+                 
+                    hpTitle.text =  "\((results.stats?[0].base_stat ?? 0))"
                     hpBar.progress = Float(results.stats?[0].base_stat ?? 0) / 100
                     hpBar.tintColor = hpBar.progress > 0.6 ? .green : .red
                     
-                    attackTitle.text = "Attack          " + String(results.stats?[1].base_stat ?? 0)
+                    attackTitle.text = "\(String(results.stats?[1].base_stat ?? 0))"
                     attackBar.progress = Float(results.stats?[1].base_stat ?? 0) / 100
                     attackBar.tintColor = attackBar.progress > 0.6 ? .green : .red
                     
-                    defenceTitle.text = "Defence       " + String(results.stats?[2].base_stat ?? 0)
+                    defenceTitle.text = "\(String(results.stats?[2].base_stat ?? 0))"
                     defenceBar.progress = Float(results.stats?[2].base_stat ?? 0) / 100
                     defenceBar.tintColor = defenceBar.progress > 0.6 ? .green : .red
                     
-                    speedTitle.text = "Speed           " + String(results.stats?[3].base_stat ?? 0)
+                    speedTitle.text = "\(String(results.stats?[3].base_stat ?? 0))"
                     speedBar.progress = Float(results.stats?[3].base_stat ?? 0) / 100
                     speedBar.tintColor = speedBar.progress > 0.6 ? .green : .red
                     
@@ -162,6 +221,11 @@ class PokemonDetailVC: UIViewController {
         containerView.addSubview(attackTitle)
         containerView.addSubview(defenceTitle)
         containerView.addSubview(speedTitle)
+        
+        containerView.addSubview(hpImage)
+        containerView.addSubview(attackImage)
+        containerView.addSubview(defenceImage)
+        containerView.addSubview(speedImage)
         
         containerView.addSubview(hpBar)
         containerView.addSubview(attackBar)
@@ -198,36 +262,52 @@ class PokemonDetailVC: UIViewController {
             containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
             containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
             
+            hpImage.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 30),
+            hpImage.heightAnchor.constraint(equalToConstant: 20),
+            hpImage.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            
             hpTitle.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 30),
             hpTitle.heightAnchor.constraint(equalToConstant: 20),
-            hpTitle.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            hpTitle.leadingAnchor.constraint(equalTo: hpImage.trailingAnchor, constant: 8),
             
             hpBar.centerYAnchor.constraint(equalTo: hpTitle.centerYAnchor),
             hpBar.leadingAnchor.constraint(equalTo: hpTitle.trailingAnchor, constant: 30),
             hpBar.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -30),
             hpBar.heightAnchor.constraint(equalToConstant: 5),
             
+            attackImage.topAnchor.constraint(equalTo: hpTitle.bottomAnchor, constant: 13),
+            attackImage.heightAnchor.constraint(equalToConstant: 20),
+            attackImage.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            
             attackTitle.topAnchor.constraint(equalTo: hpTitle.bottomAnchor, constant: 13),
             attackTitle.heightAnchor.constraint(equalToConstant: 20),
-            attackTitle.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            attackTitle.leadingAnchor.constraint(equalTo: attackImage.trailingAnchor, constant: 8),
             
             attackBar.centerYAnchor.constraint(equalTo: attackTitle.centerYAnchor),
             attackBar.leadingAnchor.constraint(equalTo: attackTitle.trailingAnchor, constant: 30),
             attackBar.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -30),
             attackBar.heightAnchor.constraint(equalToConstant: 5),
             
+            defenceImage.topAnchor.constraint(equalTo: attackTitle.bottomAnchor, constant: 13),
+            defenceImage.heightAnchor.constraint(equalToConstant: 20),
+            defenceImage.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            
             defenceTitle.topAnchor.constraint(equalTo: attackTitle.bottomAnchor, constant: 13),
             defenceTitle.heightAnchor.constraint(equalToConstant: 20),
-            defenceTitle.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            defenceTitle.leadingAnchor.constraint(equalTo: defenceImage.trailingAnchor, constant: 8),
             
             defenceBar.centerYAnchor.constraint(equalTo: defenceTitle.centerYAnchor),
             defenceBar.leadingAnchor.constraint(equalTo: defenceTitle.trailingAnchor, constant: 30),
             defenceBar.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -30),
             defenceBar.heightAnchor.constraint(equalToConstant: 5),
             
+            speedImage.topAnchor.constraint(equalTo: defenceTitle.bottomAnchor, constant: 13),
+            speedImage.heightAnchor.constraint(equalToConstant: 20),
+            speedImage.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            
             speedTitle.topAnchor.constraint(equalTo: defenceTitle.bottomAnchor, constant: 13),
             speedTitle.heightAnchor.constraint(equalToConstant: 20),
-            speedTitle.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
+            speedTitle.leadingAnchor.constraint(equalTo: speedImage.trailingAnchor, constant: 8),
             
             speedBar.centerYAnchor.constraint(equalTo: speedTitle.centerYAnchor),
             speedBar.leadingAnchor.constraint(equalTo: speedTitle.trailingAnchor, constant: 30),

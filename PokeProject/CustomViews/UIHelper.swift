@@ -1,10 +1,9 @@
 //
 //  UIHelper.swift
-//  GitFollowers
+//  PokeProject
 //
-//  Created by James Jones on 11/07/2020.
-//  Copyright © 2020 James Jones. All rights reserved.
-//
+//  Created by James Jones on 20/06/2022.
+//  
 
 import UIKit
 

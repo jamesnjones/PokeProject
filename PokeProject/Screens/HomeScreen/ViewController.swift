@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  PokeProject
 //
-//  Created by james Jones on 13/08/2021.
+//  Created by james Jones on 20/06/2022.
 //
 
 import UIKit
@@ -61,7 +61,7 @@ class ViewController: UIViewController {
         let textAttributes = [NSAttributedString.Key.foregroundColor:  #colorLiteral(red: 1, green: 0.7469804883, blue: 0.3268558979, alpha: 1),
                               NSAttributedString.Key.font: UIFont(name: K.fontName, size: 24)!] as [NSAttributedString.Key : Any]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
-        
+       
         // here we are setting specific attributes the page title, font, size and colour
     }
     
